@@ -110,8 +110,37 @@ export class LinksList {
 			const newLink = newLinks[newIndex];
 
 			if (Range.areIntersectingOrTouching(oldLink.range, newLink.range)) {
-				// Remove the oldLink
-				oldIndex++;
+				// When links overlap, use hybrid resolution:
+				// 1. If one link contains the other, prefer the longer (more specific) link
+				// 2. For partial overlaps, prefer the leftmost link (earlier start position)
+				const oldContainsNew = Range.containsRange(oldLink.range, newLink.range);
+				const newContainsOld = Range.containsRange(newLink.range, oldLink.range);
+
+				if (oldContainsNew || newContainsOld) {
+					// Containment case: prefer the longer (containing) link
+					const oldLength = oldLink.range.endColumn - oldLink.range.startColumn +
+						(oldLink.range.endLineNumber - oldLink.range.startLineNumber) * 10000;
+					const newLength = newLink.range.endColumn - newLink.range.startColumn +
+						(newLink.range.endLineNumber - newLink.range.startLineNumber) * 10000;
+
+					if (oldLength >= newLength) {
+						// Keep the longer oldLink, skip newLink
+						newIndex++;
+					} else {
+						// Remove the shorter oldLink
+						oldIndex++;
+					}
+				} else {
+					// Partial overlap: prefer the leftmost link (earlier start position)
+					const startComparison = Range.compareRangesUsingStarts(oldLink.range, newLink.range);
+					if (startComparison <= 0) {
+						// oldLink starts earlier or at same position, keep it
+						newIndex++;
+					} else {
+						// newLink starts earlier, skip oldLink
+						oldIndex++;
+					}
+				}
 				continue;
 			}
 
