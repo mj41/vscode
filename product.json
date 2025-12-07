@@ -142,5 +142,174 @@
 		"completionsAdvancedSetting": "github.copilot.advanced",
 		"completionsEnablementSetting": "github.copilot.enable",
 		"nextEditSuggestionsSetting": "github.copilot.nextEditSuggestions.enabled"
-	}
+	},
+	"extensionEnabledApiProposals": {
+		"GitHub.codespaces": [
+			"contribViewsRemote",
+			"resolvers",
+			"tunnels",
+			"terminalDimensions",
+			"idToken",
+			"localization",
+			"contribRemoteHelp",
+			"contribMenuBarHome",
+			"portsAttributes",
+			"notebookLiveShare",
+			"canonicalUriProvider",
+			"contribViewsWelcome",
+			"contribShareMenu",
+			"languageModelSystem",
+			"lmTools",
+			"chatParticipantPrivate",
+			"authLearnMore"
+		],
+		"GitHub.copilot": [
+			"inlineCompletionsAdditions",
+			"interactive",
+			"terminalDataWriteEvent",
+			"devDeviceId"
+		],
+		"GitHub.copilot-chat": [
+			"authSession",
+			"chatEditing",
+			"chatParticipantAdditions",
+			"chatProvider",
+			"chatTab",
+			"chatVariableResolver",
+			"codeActionAI",
+			"contribSourceControlHistoryItemMenu",
+			"contribSourceControlInputBoxMenu",
+			"createFileSystemWatcher",
+			"debugVisualization",
+			"defaultChatParticipant",
+			"devDeviceId",
+			"diffCommand",
+			"editSessionIdentityProvider",
+			"embeddings",
+			"extensionRuntime",
+			"fileSearchProvider",
+			"handleIssueUri",
+			"inlineCompletionsAdditions",
+			"interactive",
+			"interactiveUserActions",
+			"ipc",
+			"languageModelSystem",
+			"languageModels",
+			"lmToolsWithModes",
+			"mcpServers",
+			"newSymbolNamesProvider",
+			"portsAttributes",
+			"quickDiffProvider",
+			"scmActionButton",
+			"scmHistoryProvider",
+			"scmSelectedProvider",
+			"scmTextDocument",
+			"scmValidation",
+			"tabInputTextMerge",
+			"terminalDataWriteEvent",
+			"terminalExecuteCommandEvent",
+			"terminalSelection",
+			"terminalShellIntegration",
+			"testObserver",
+			"textSearchProvider",
+			"tokenInformation"
+		],
+		"GitHub.remotehub": [
+			"contribRemoteHelp",
+			"contribMenuBarHome",
+			"contribViewsRemote",
+			"contribViewsWelcome",
+			"documentFiltersExclusive",
+			"extensionRuntime",
+			"fileSearchProvider",
+			"quickPickSortByLabel",
+			"textSearchProvider"
+		],
+		"GitHub.vscode-pull-request-github": [
+			"codiconDecoration",
+			"commentsResolvedState",
+			"contribCommentPeekContext",
+			"contribCommentsViewThreadMenus",
+			"diffCommand",
+			"fileComments",
+			"quickDiffProvider",
+			"scmActionButton",
+			"scmHistoryProvider",
+			"scmSelectedProvider",
+			"shareProvider",
+			"tabInputTextMerge",
+			"treeItemCheckbox",
+			"chatParticipantPrivate",
+			"lmTools",
+			"languageModelSystem"
+		],
+		"ms-vscode.azure-repos": [
+			"extensionRuntime",
+			"fileSearchProvider",
+			"textSearchProvider"
+		],
+		"ms-vscode.remote-repositories": [
+			"canonicalUriProvider",
+			"contribEditSessions",
+			"contribRemoteHelp",
+			"contribMenuBarHome",
+			"contribViewsRemote",
+			"contribViewsWelcome",
+			"documentFiltersExclusive",
+			"editSessionIdentityProvider",
+			"extensionRuntime",
+			"fileSearchProvider",
+			"quickPickSortByLabel",
+			"textSearchProvider",
+			"workspaceTrust"
+		],
+		"ms-vscode.remote-server": [
+			"resolvers"
+		],
+		"ms-vscode.vscode-commander": [
+			"chatParticipantPrivate",
+			"lmTools",
+			"languageModelSystem"
+		],
+		"ms-vsliveshare.vsliveshare": [
+			"contribEditSessions",
+			"contribMenuBarHome",
+			"contribViewsRemote",
+			"contribViewsWelcome",
+			"diffContentOptions",
+			"documentFiltersExclusive",
+			"fileSearchProvider",
+			"notebookControllerAffinityHidden",
+			"notebookLiveShare",
+			"resolvers",
+			"terminalDimensions",
+			"textSearchProvider"
+		]
+	},
+	"extensionsEnabledWithApiProposalVersion": [
+		"GitHub.copilot-chat",
+		"ms-vscode.vscode-commander",
+		"GitHub.vscode-pull-request-github"
+	],
+	"trustedExtensionAuthAccess": {
+		"github": [
+			"vscode.git",
+			"vscode.github",
+			"github.vscode-pull-request-github",
+			"github.copilot",
+			"github.copilot-chat",
+			"github.remotehub",
+			"github.codespaces"
+		],
+		"github-enterprise": [
+			"github.copilot",
+			"github.copilot-chat",
+			"github.vscode-pull-request-github"
+		]
+	},
+	"trustedExtensionPublishers": [
+		"microsoft",
+		"github",
+		"openai"
+	]
 }
