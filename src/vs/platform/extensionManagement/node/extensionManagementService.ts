@@ -345,22 +345,21 @@ export class ExtensionManagementService extends AbstractExtensionManagementServi
 		const { location, verificationStatus } = await this.extensionsDownloader.download(extension, operation, verifySignature, clientTargetPlatform);
 		const shouldRequireSignature = shouldRequireRepositorySignatureFor(extension.private, await this.extensionGalleryManifestService.getExtensionGalleryManifest());
 
+		// Skip signature verification errors if the vsce-sign module is not available (verificationStatus is undefined)
+		// This allows Code-OSS builds without the proprietary signing module to still install extensions
 		if (
 			verificationStatus !== ExtensionSignatureVerificationCode.Success
 			&& !(verificationStatus === ExtensionSignatureVerificationCode.NotSigned && !shouldRequireSignature)
 			&& verifySignature
 			&& this.environmentService.isBuilt
 			&& (await this.getTargetPlatform()) !== TargetPlatform.LINUX_ARMHF
+			&& verificationStatus !== undefined
 		) {
 			try {
 				await this.extensionsDownloader.delete(location);
 			} catch (e) {
 				/* Ignore */
 				this.logService.warn(`Error while deleting the downloaded file`, location.toString(), getErrorMessage(e));
-			}
-
-			if (!verificationStatus) {
-				throw new ExtensionManagementError(nls.localize('signature verification not executed', "Signature verification was not executed."), ExtensionManagementErrorCode.SignatureVerificationInternal);
 			}
 
 			switch (verificationStatus) {
