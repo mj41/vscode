@@ -612,6 +612,13 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 	readonly #webviewPanel: vscode.WebviewPanel;
 	#preview: MarkdownPreview;
 
+	/**
+	 * Flag to track if preview scroll should sync to editor cursor position.
+	 * Set to true when preview navigates to a different document via link click.
+	 * Cleared when sync occurs or selection changes.
+	 */
+	#needsScrollSync: boolean = false;
+
 	public static revive(
 		input: DynamicPreviewInput,
 		webview: vscode.WebviewPanel,
@@ -686,6 +693,24 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 
 		this._register(this.#webviewPanel.onDidChangeViewState(e => {
 			this.#onDidChangeViewStateEmitter.fire(e);
+
+			// Handle edge case: user clicks in editor at exact same cursor position after preview navigated.
+			// When preview loses focus (user clicks editor), vscode.window.activeTextEditor is not yet
+			// populated - it's still undefined because the editor activation happens after this event.
+			// This is a race condition in VS Code's event ordering. The 10ms setTimeout defers our check
+			// until the next event loop tick, allowing time for the editor to become the activeTextEditor.
+			// Without this delay, clicking at the same cursor position wouldn't trigger onDidChangeTextEditorSelection,
+			// and we'd miss the opportunity to sync the preview scroll position.
+			if (!e.webviewPanel.active && this.#needsScrollSync) {
+				setTimeout(() => {
+					const editor = vscode.window.activeTextEditor;
+					if (editor && this.#preview.isPreviewOf(editor.document.uri) && this.#needsScrollSync) {
+						const cursorLine = editor.selection.active.line;
+						this.#needsScrollSync = false;
+						this.#preview.scrollTo(cursorLine);
+					}
+				}, 10); // 10ms delay allows editor activation to complete
+			}
 		}));
 
 		this._register(this.#topmostLineMonitor.onDidChanged(event => {
@@ -696,11 +721,20 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 
 		this._register(vscode.window.onDidChangeTextEditorSelection(event => {
 			if (this.#preview.isPreviewOf(event.textEditor.document.uri)) {
+				const cursorLine = event.selections[0].active.line;
+
+				// Clear the sync flag since selection changed (user clicked at different position)
+				this.#needsScrollSync = false;
+
+				// Send message to webview for highlighting
 				this.#preview.postMessage({
 					type: 'onDidChangeTextEditorSelection',
-					line: event.selections[0].active.line,
+					line: cursorLine,
 					source: this.#preview.resource.toString()
 				});
+
+				// Sync preview scroll position to cursor location
+				this.#preview.scrollTo(cursorLine);
 			}
 		}));
 
@@ -710,9 +744,21 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 				return;
 			}
 
-			if (isMarkdownFile(editor.document) && !this.#locked && !this.#preview.isPreviewOf(editor.document.uri)) {
+			if (isMarkdownFile(editor.document) && !this.#locked) {
 				const line = getVisibleLine(editor);
-				this.update(editor.document.uri, line ? new StartingScrollLine(line) : undefined);
+				if (!this.#preview.isPreviewOf(editor.document.uri)) {
+					// Different document - update to show it
+					this.update(editor.document.uri, line ? new StartingScrollLine(line) : undefined);
+				} else if (this.#needsScrollSync && line !== undefined) {
+					// Same document but preview navigated away - sync on first editor activation
+					this.#needsScrollSync = false;
+					this.#preview.scrollTo(line);
+				} else if (line !== undefined) {
+					// Same document - sync preview to cursor position
+					// This handles clicking back in editor at the same cursor position
+					// after preview navigated via a link
+					this.#preview.scrollTo(line);
+				}
 			}
 		}));
 	}
@@ -764,7 +810,9 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 	}
 
 	public update(newResource: vscode.Uri, scrollLocation?: StartingScrollLocation) {
-		if (this.#preview.isPreviewOf(newResource)) {
+		const isSameResource = this.#preview.isPreviewOf(newResource);
+
+		if (isSameResource) {
 			switch (scrollLocation?.type) {
 				case 'line':
 					this.#preview.scrollTo(scrollLocation.line);
@@ -778,6 +826,10 @@ export class DynamicMarkdownPreview extends Disposable implements IManagedMarkdo
 					return;
 			}
 		}
+
+		// Preview is navigating to a different document (e.g., user clicked a link in preview).
+		// Set flag to sync preview scroll to cursor position when user returns to editor.
+		this.#needsScrollSync = true;
 
 		this.#preview.dispose();
 		this.#preview = this.#createPreview(newResource, scrollLocation);
